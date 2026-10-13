@@ -1,0 +1,12 @@
+- insert:
+    - id: pelican-router
+      name: dsh-pelican-router
+      config:
+        endpoint: http://127.0.0.1:19140
+        classifierMaxTokens: 4096
+        classifierTimeoutMs: 120000
+        classifierAttempts: 2
+        generationMaxTokens: 32000
+        generationTimeoutMs: 1800000
+        decisionCacheSize: 256
+        preview: true

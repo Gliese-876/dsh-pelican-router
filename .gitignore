@@ -1,0 +1,16 @@
+node_modules/
+dist/
+*.tgz
+*.zip
+.npmrc
+*.pem
+*.key
+.runtime/
+dsh/
+research-model/
+artifacts/
+.dsh-smoke/
+*.log
+.env
+.env.*
+!.env.example
