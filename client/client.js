@@ -3,11 +3,13 @@ window.__ModuleLoader__.load({
   id: 'dsh-pelican-router',
   factory(require) {
     const { createElement: h, useEffect, useState } = require('react')
+    const { createPortal } = require('react-dom')
     return {
       inject: ['slots', 'connection'],
       apply(ctx) {
-        function WorkflowCard({ sessionId }) {
+        function WorkflowWindow({ sessionId }) {
           const [snapshot, setSnapshot] = useState(null)
+          const [minimized, setMinimized] = useState(false)
           useEffect(() => {
             const abort = new AbortController()
             let timer
@@ -32,19 +34,42 @@ window.__ModuleLoader__.load({
               }
             }
             setSnapshot(null)
+            setMinimized(false)
             refresh()
             return () => { abort.abort(); clearTimeout(timer) }
           }, [sessionId])
           if (!snapshot) return null
-          return h('section', {
-            role: 'status', 'aria-label': 'Pelican Router 插件流程',
-            style: { padding: '10px 14px', marginBottom: 8, border: '1px solid #8885', borderRadius: 10, fontSize: 12, lineHeight: 1.7 },
-          }, h('strong', null, 'Pelican Router · 插件流程'),
-          h('ol', { style: { paddingLeft: 20, margin: '4px 0 0' } },
-            snapshot.stages.map((stage, index) => h('li', { key: index }, stage))))
+          const current = snapshot.stages.at(-1)
+          const route = snapshot.stages.find(stage => stage.startsWith('已路由至'))
+            ?? snapshot.stages.find(stage => stage.includes('继续由原模型'))
+          const status = { running: '进行中', complete: '已完成', error: '异常' }[snapshot.status]
+          return createPortal(h('aside', {
+            'aria-label': 'Pelican Router 模型状态',
+            style: {
+              position: 'fixed', right: 16, bottom: 16, zIndex: 40,
+              width: minimized ? 220 : 280, maxWidth: 'calc(100vw - 32px)', boxSizing: 'border-box',
+              padding: '10px 12px', borderRadius: 12, border: '1px solid var(--dsw-alias-border-l2-darkmode-thin, #8885)',
+              background: 'var(--dsw-specific-input-major, Canvas)', color: 'var(--dsw-alias-label-primary, CanvasText)',
+              boxShadow: '0 4px 20px #0002', fontSize: 12, lineHeight: 1.6, overflowWrap: 'anywhere',
+            },
+          }, h('div', { style: { display: 'flex', alignItems: 'center', gap: 8 } },
+            h('strong', { style: { flex: 1 } }, 'Pelican Router'),
+            h('span', { style: { fontSize: 11, color: snapshot.status === 'error' ? '#d74444' : 'inherit' } }, status),
+            h('button', {
+              type: 'button', 'aria-label': minimized ? '展开模型状态' : '收起模型状态', 'aria-expanded': !minimized,
+              onClick: () => setMinimized(value => !value),
+              style: { padding: '2px 4px', border: 0, background: 'transparent', color: 'inherit', font: 'inherit', cursor: 'pointer' },
+            }, minimized ? '展开' : '收起')),
+          !minimized && h('div', null,
+            h('div', { role: 'status', 'aria-live': 'polite', style: { marginTop: 6 } }, current),
+            route && route !== current && h('div', { style: { marginTop: 4, opacity: 0.75 } }, route),
+            h('details', { style: { marginTop: 6 } },
+              h('summary', { style: { cursor: 'pointer', opacity: 0.75 } }, '流程详情'),
+              h('ol', { style: { paddingLeft: 18, margin: '6px 0 0', maxHeight: 'min(160px, 35vh)', overflowY: 'auto' } },
+                snapshot.stages.map((stage, index) => h('li', { key: index }, stage)))))), document.body)
         }
         ctx.slots.inject('conversation.input.dock', () =>
-          ctx.slots.register({ name: 'conversation.input.dock', id: 'pelican-router-workflow', order: -20 }, WorkflowCard))
+          ctx.slots.register({ name: 'conversation.input.dock', id: 'pelican-router-workflow', order: -20 }, WorkflowWindow))
       },
     }
   },

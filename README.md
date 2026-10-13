@@ -13,7 +13,7 @@
 ## 工作方式
 
 1. 拦截原会话第一次模型调用，读取本次最新的人类文本输入。工具结果、辅助模型调用和后续工具循环直接放行。
-2. 在独立、临时的对话上下文中，通过 Harness 的 `llm` 服务调用原请求的 **同一个 provider、model 和 reasoningEffort**。会话的插件流程卡显示“正在判断……”。不复制原会话历史，不给分类器工具，不新建侧栏聊天。
+2. 在独立、临时的对话上下文中，通过 Harness 的 `llm` 服务调用原请求的 **同一个 provider、model 和 reasoningEffort**。模型状态悬浮窗显示“正在判断……”。不复制原会话历史，不给分类器工具，不新建侧栏聊天。
 3. 分类器只允许 `0` 或 `1`：只有“制作鹈鹕骑自行车网页”的意图返回 `1`。介绍这个梗、讨论模型、翻译这句话、普通骑车问题均返回 `0`。分类失败会重试；仍无有效标签时返回错误，不靠关键词补判。
 4. `0` 原样委托原适配器；`1` 以 `stream: true` 请求本机 `llama-server /completion`，由真实 GGUF 权重重新生成整个网页。分类器读取完整本次输入；已确认的制作意图在本地规范化为模型支持的中文任务提示“生成鹈鹕骑自行车的html”，不传历史。当前 V2 对等义英文输入可能返回不支持，不能直接照抄模型卡的“任意输入”描述。
 5. 收到 SSE 文本后立即转成原会话的 `text-delta`，保留模型自带的 Markdown HTML 代码块。生成完成后才去掉外层围栏、验证完整 HTML 并保存预览文件，最后追加预览链接、`block-end → usage → finish`。不改写网页内容；取消或失败会正常中断流，不会替换为固定答案。
@@ -70,13 +70,13 @@ powershell -ExecutionPolicy Bypass -File scripts/stop-model.ps1
 已发布到 npm 后，WebUI 使用包名安装：
 
 ```powershell
-npx --yes @deepseek-ai/dsh@0.2.1-alpha.2 plugin --profile web add dsh-pelican-router@0.1.0
+npx --yes @deepseek-ai/dsh@0.2.1-alpha.2 plugin --profile web add dsh-pelican-router@0.1.1
 ```
 
 Desktop 需先打开一次以初始化 profile，完全退出后使用其安装目录内置的命令：
 
 ```powershell
-& 'C:/实际安装目录/resources/runtime/cli/bin/dsh.cmd' plugin --profile desktop add dsh-pelican-router@0.1.0
+& 'C:/实际安装目录/resources/runtime/cli/bin/dsh.cmd' plugin --profile desktop add dsh-pelican-router@0.1.1
 ```
 
 也可从 [GitHub Releases](https://github.com/Gliese-876/dsh-pelican-router/releases) 下载预编译的 `.tgz`，用下面的本地包命令安装。包内已包含编译文件，无需允许安装时构建脚本。
@@ -90,7 +90,7 @@ npm pack
 在同一目录安装至所需 profile；这些命令会更新该 profile 的插件配置：
 
 ```powershell
-npx --yes @deepseek-ai/dsh@0.2.1-alpha.2 plugin --profile web add ./dsh-pelican-router-0.1.0.tgz
+npx --yes @deepseek-ai/dsh@0.2.1-alpha.2 plugin --profile web add ./dsh-pelican-router-0.1.1.tgz
 ```
 
 WebUI 可用 `npx --yes @deepseek-ai/dsh@0.2.1-alpha.2 web` 启动。
@@ -98,7 +98,7 @@ WebUI 可用 `npx --yes @deepseek-ai/dsh@0.2.1-alpha.2 web` 启动。
 Desktop 使用匹配版本的官方桌面客户端：先打开一次以初始化 profile，完全退出，再使用 Desktop 安装目录中 `resources/runtime/cli/bin/dsh.cmd` 自带的命令载体安装。将下面路径替换为实际安装位置：
 
 ```powershell
-& 'C:/实际安装目录/resources/runtime/cli/bin/dsh.cmd' plugin --profile desktop add (Join-Path (Get-Location) 'dsh-pelican-router-0.1.0.tgz')
+& 'C:/实际安装目录/resources/runtime/cli/bin/dsh.cmd' plugin --profile desktop add (Join-Path (Get-Location) 'dsh-pelican-router-0.1.1.tgz')
 ```
 
 普通 npm/npx CLI 会拒绝管理保留的 `desktop` profile，因此 Desktop 必须使用其自带命令。安装后重新打开相应客户端。原会话要先配置一个可正常调用的模型；分类器复用 Harness 对它的配置和认证，不单独保存 API key。
@@ -112,7 +112,7 @@ npx --yes @deepseek-ai/dsh@0.2.1-alpha.2 plugin --profile web remove dsh-pelican
 
 ## 日常呈现与配置
 
-会话输入框上方的插件流程卡明确显示“正在判断……”“已路由至本地 0u0ai Pelican PRO……”“正在推理并流式输出……”等状态；无关请求显示继续由原模型回答。流程卡通过独立的、经过 Harness 认证的 UI 通道读取临时状态，不写入会话消息或工具结果，也不进入模型上下文。插件不修改模型选择器；实际路由以流程卡为准。
+右下角的小悬浮窗显示当前模型状态与路由信息，可收起，也可展开完整流程，支持明暗主题。“正在判断……”“已路由至本地 0u0ai Pelican PRO……”“正在推理并流式输出……”等状态明确可见；无关请求显示继续由原模型回答。悬浮窗通过独立的、经过 Harness 认证的 UI 通道读取临时状态，不写入会话消息或工具结果，也不进入模型上下文。插件不修改模型选择器；实际路由以悬浮窗为准。
 
 Harness 不会直接执行聊天 Markdown 中的 HTML。插件会保留可复制的 HTML 代码块；在可写工作区中创建一个新的 `.html` 文件，供客户端内建的沙箱预览器打开。写入遵循当前会话的文件系统与 sandbox 策略；不会覆盖已有文件。`preview: false` 可以只输出代码块。
 

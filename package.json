@@ -1,6 +1,6 @@
 {
   "name": "dsh-pelican-router",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Pelican Cycling: an excessively AI-powered DeepSeek Harness prank plugin",
   "type": "module",
   "license": "AGPL-3.0-only",
