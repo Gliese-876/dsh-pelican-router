@@ -70,13 +70,13 @@ powershell -ExecutionPolicy Bypass -File scripts/stop-model.ps1
 已发布到 npm 后，WebUI 使用包名安装：
 
 ```powershell
-npx --yes @deepseek-ai/dsh@0.2.1-alpha.2 plugin --profile web add dsh-pelican-router@0.1.1
+npx --yes @deepseek-ai/dsh@0.2.1-alpha.2 plugin --profile web add dsh-pelican-router@0.1.2
 ```
 
 Desktop 需先打开一次以初始化 profile，完全退出后使用其安装目录内置的命令：
 
 ```powershell
-& 'C:/实际安装目录/resources/runtime/cli/bin/dsh.cmd' plugin --profile desktop add dsh-pelican-router@0.1.1
+& 'C:/实际安装目录/resources/runtime/cli/bin/dsh.cmd' plugin --profile desktop add dsh-pelican-router@0.1.2
 ```
 
 也可从 [GitHub Releases](https://github.com/Gliese-876/dsh-pelican-router/releases) 下载预编译的 `.tgz`，用下面的本地包命令安装。包内已包含编译文件，无需允许安装时构建脚本。
@@ -90,7 +90,7 @@ npm pack
 在同一目录安装至所需 profile；这些命令会更新该 profile 的插件配置：
 
 ```powershell
-npx --yes @deepseek-ai/dsh@0.2.1-alpha.2 plugin --profile web add ./dsh-pelican-router-0.1.1.tgz
+npx --yes @deepseek-ai/dsh@0.2.1-alpha.2 plugin --profile web add ./dsh-pelican-router-0.1.2.tgz
 ```
 
 WebUI 可用 `npx --yes @deepseek-ai/dsh@0.2.1-alpha.2 web` 启动。
@@ -98,7 +98,7 @@ WebUI 可用 `npx --yes @deepseek-ai/dsh@0.2.1-alpha.2 web` 启动。
 Desktop 使用匹配版本的官方桌面客户端：先打开一次以初始化 profile，完全退出，再使用 Desktop 安装目录中 `resources/runtime/cli/bin/dsh.cmd` 自带的命令载体安装。将下面路径替换为实际安装位置：
 
 ```powershell
-& 'C:/实际安装目录/resources/runtime/cli/bin/dsh.cmd' plugin --profile desktop add (Join-Path (Get-Location) 'dsh-pelican-router-0.1.1.tgz')
+& 'C:/实际安装目录/resources/runtime/cli/bin/dsh.cmd' plugin --profile desktop add (Join-Path (Get-Location) 'dsh-pelican-router-0.1.2.tgz')
 ```
 
 普通 npm/npx CLI 会拒绝管理保留的 `desktop` profile，因此 Desktop 必须使用其自带命令。安装后重新打开相应客户端。原会话要先配置一个可正常调用的模型；分类器复用 Harness 对它的配置和认证，不单独保存 API key。
@@ -112,7 +112,7 @@ npx --yes @deepseek-ai/dsh@0.2.1-alpha.2 plugin --profile web remove dsh-pelican
 
 ## 日常呈现与配置
 
-右下角的小悬浮窗显示当前模型状态与路由信息，可收起，也可展开完整流程，支持明暗主题。“正在判断……”“已路由至本地 0u0ai Pelican PRO……”“正在推理并流式输出……”等状态明确可见；无关请求显示继续由原模型回答。悬浮窗通过独立的、经过 Harness 认证的 UI 通道读取临时状态，不写入会话消息或工具结果，也不进入模型上下文。插件不修改模型选择器；实际路由以悬浮窗为准。
+右下角的小悬浮窗显示当前模型状态与路由信息，可拖动标题栏移动位置，可收起，也可展开完整流程，支持明暗主题。“正在判断……”“已路由至本地 0u0ai Pelican PRO……”“正在推理并流式输出……”等状态明确可见；无关请求显示继续由原模型回答。悬浮窗通过独立的、经过 Harness 认证的 UI 通道读取临时状态，不写入会话消息或工具结果，也不进入模型上下文。插件不修改模型选择器；实际路由以悬浮窗为准。
 
 Harness 不会直接执行聊天 Markdown 中的 HTML。插件会保留可复制的 HTML 代码块；在可写工作区中创建一个新的 `.html` 文件，供客户端内建的沙箱预览器打开。写入遵循当前会话的文件系统与 sandbox 策略；不会覆盖已有文件。`preview: false` 可以只输出代码块。
 
