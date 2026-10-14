@@ -10,6 +10,8 @@
 
 它没有关键词路由，没有内置网页，没有 HTML 响应缓存，也没有把失败请求换成预制答案。
 
+![PelicanBench performance comparison](docs/images/pelicanbench.png)
+
 ## 工作方式
 
 1. 拦截原会话第一次模型调用，读取本次最新的人类文本输入。工具结果、辅助模型调用和后续工具循环直接放行。
